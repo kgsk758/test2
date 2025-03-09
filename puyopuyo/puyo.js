@@ -4,15 +4,16 @@ const canvas = document.getElementById("maincanvas");
 const ctx = canvas.getContext("2d");
 const ROWS = 14;
 const COLUMNS = 6;
-const SIZE = 30;
+let SIZE = 30;
 const width = window.innerWidth;
 console.log(width);
 if(width <= 480){
-canvas.style.width = `${COLUMNS*SIZE}px`;
+    canvas.style.width = `${COLUMNS*SIZE}px`;
 canvas.style.height = `${(ROWS-2)*SIZE}px`;
 //ui.style.fontsize = "10px";
 }else{
-canvas.style.width = `${COLUMNS*(SIZE+20)}px`;
-canvas.style.height = `${(ROWS-2)*(SIZE+20)}px`;
+    SIZE += 20;
+canvas.style.width = `${COLUMNS*(SIZE)}px`;
+canvas.style.height = `${(ROWS-2)*(SIZE)}px`;
 //ui.style.fontsize = "100px";
 }
