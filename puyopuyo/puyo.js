@@ -4,7 +4,7 @@ const canvas = document.getElementById("maincanvas");
 const ctx = canvas.getContext("2d");
 const ROWS = 14;
 const COLUMNS = 6;
-let SIZE = 30;
+let SIZE = 40;
 const width = window.innerWidth;
 console.log(width);
 if(width <= 480){
