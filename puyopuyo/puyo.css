@@ -51,9 +51,25 @@ footer div{
 }
 #UI button{
     @media (min-width: 600px){
-        width: 60px;
         height: 60px;
         font-size: 40px;
-        margin: 5px;
+        margin: 8px;
     }
+    background: rgba(255, 255, 255, 0.2);
+    /*border: 2px solid rgba(255, 255, 255, 0.5);*/
+    color: white;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2), 0 6px 12px rgba(255, 255, 255, 0.1);
+}
+#UI button:hover{
+    background: rgba(110, 110, 110, 0.2);
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2), 0 6px 12px rgba(255, 255, 255, 0.1);
+}
+#UI button:active{
+    background: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.25);
+}
+#newgamediv{
+    margin-top: 20px;
 }
