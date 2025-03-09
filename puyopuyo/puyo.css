@@ -48,6 +48,8 @@ footer div{
     @media (max-width: 600px){
         font-size: 15px;
     }
+    display: flex;
+    flex-direction: column;
 }
 #UI button{
     @media (min-width: 600px){
@@ -61,6 +63,7 @@ footer div{
     outline: none;
     transition: all 0.3s ease;
     box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2), 0 6px 12px rgba(255, 255, 255, 0.1);
+    margin-top: 3vw;
 }
 #UI button:hover{
     background: rgba(110, 110, 110, 0.2);
@@ -70,6 +73,8 @@ footer div{
     background: rgba(255, 255, 255, 0.4);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.25);
 }
-#newgamediv{
-    margin: 20px;
+#UI p{
+    margin-top: 0vw;
+    margin-bottom: 0vw;
 }
+
