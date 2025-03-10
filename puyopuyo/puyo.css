@@ -36,11 +36,11 @@ footer div{
         font-size: 2vw;
     }
 }
-.non_stretch{
+/*.non_stretch{
     align-self: flex-start;
     align-self: center;
     width: 10%;
-}
+}*/
 .whitelink{
     color: white;
     
