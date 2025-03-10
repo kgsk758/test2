@@ -4,6 +4,7 @@
 }
 body{
     background-color: black;
+    touch-action: none;
 }
 h1{
     color: white;
