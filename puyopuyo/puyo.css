@@ -9,13 +9,12 @@ h1{
     color: white;
     font-size: 5vw;
     @media(min-width: 600px){
-        font-size: 2vw;
+        font-size: 4vw;
     }
 }
 footer{
     background-color: rgb(39, 43, 43);
     color: white;
-    text-align: center;
     display: flex;
     flex-direction: row;
     justify-content: space-around;
@@ -49,7 +48,7 @@ footer div{
 #UI{
     font-size: 40px;
     @media (max-width: 600px){
-        font-size: 15px;
+        font-size: 13px;
     }
     display: flex;
     flex-direction: column;
