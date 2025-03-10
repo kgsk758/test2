@@ -57,7 +57,7 @@ footer div{
     @media (min-width: 600px){
         height: 45px;
         font-size: 23px;
-        margin: 8px;
+        margin: 4px;
     }
     background: rgba(255, 255, 255, 0.2);
     /*border: 2px solid rgba(255, 255, 255, 0.5);*/
