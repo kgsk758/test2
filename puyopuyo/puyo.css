@@ -8,6 +8,9 @@ body{
 h1{
     color: white;
     font-size: 5vw;
+    @media(min-width: 600px;){
+        font-size: 2vw;
+    }
 }
 footer{
     background-color: rgb(39, 43, 43);
