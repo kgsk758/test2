@@ -17,3 +17,4 @@ canvas.style.width = `${COLUMNS*(SIZE)}px`;
 canvas.style.height = `${(ROWS-2)*(SIZE)}px`;
 //ui.style.fontsize = "100px";
 }
+document.addEventListener('touchmove', preventScroll, { passive: false });
