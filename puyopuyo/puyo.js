@@ -147,13 +147,15 @@ function drawpuyo(color, row, column, state){
     }
     console.log(spriteRow);
     ctx.drawImage(allpuyo,
-        spriteColumn*32, spriteRow*32, 32, 32, // スプライトシートの切り取り位置 (sx, sy, sw, sh)
+        spriteColumn*32, spriteRow*32 - 1, 32, 32, // スプライトシートの切り取り位置 (sx, sy, sw, sh)
         column*SIZE, row*SIZE, SIZE, SIZE // `canvas` 上の描画位置とサイズ (dx, dy, dw, dh)
     )
 
 
 }
-//allpuyo.onload=()=>{drawpuyo("yellow", 3, 2, "vanish");}
+
+
+
 //ゲーム開始
 const newgameElement = document.getElementById("newgame");
 newgameElement.addEventListener("click", newgame); //newgameボタンが押されたらnewgame関数が呼び出される
