@@ -1,4 +1,5 @@
 //初期設定
+let time = Date.now();
 const canvas = document.getElementById("maincanvas");
 const ctx = canvas.getContext("2d");
 const ROWS = 14;
@@ -10,8 +11,14 @@ let pos = {
 };
 let touchpos = {
     x: null,
-    y: null
+    y: null,
+    state: "untouched"
 };
+let firsttouchpos = {
+    x: null,
+    y: null
+}
+let touchTime = 250;
 const width = window.innerWidth;
 console.log(width);
 if(width <= 480){
@@ -23,25 +30,41 @@ canvas.style.width = `${COLUMNS*(SIZE)}px`;
 canvas.style.height = `${(ROWS-2)*(SIZE)}px`;
 }
 //タッチ処理
-let is_touched = false;
 document.addEventListener("touchstart", (event)=>{
     let touch = event.touches[0];
     touchpos.x = touch.clientX;
     touchpos.y = touch.clientY;
+    firsttouchpos.x = touch.clientX;
+    firsttouchpos.y = touch.clientY;
+    touchpos.state = "touched";
 })
 document.addEventListener("touchmove", (event)=>{
     let touch = event.touches[0];
     touchpos.x = touch.clientX;
     touchpos.y = touch.clientY;
+    touchpos.state = "touched";
 })
 document.addEventListener("touchend", (event)=>{
     let touch = event.touches[0];
-    touchpos.x = null;
-    touchpos.y = null;
+    if(Date.now() - time < touchTime && firsttouchpos.x == touch.clientX && firsttouchpos.y == touch.clientY){
+        //タップ
+        console.log("tap");
+    }else{
+        //スワイプ
+        console.log("swipe");
+    }
+
+
+    touchpos.x = touch.clientX;
+    touchpos.y = touch.clientY;
+    touchpos.state = "untouched";
 })
 
 //ずっと処理
 function mainroop(){
+    if(touchpos.state = "untouched"){
+        time = Date.now();
+    }
     console.log(touchpos);
     requestAnimationFrame(mainroop);
 }
