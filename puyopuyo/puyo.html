@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="ぷよぷよのシミュレーション">
@@ -15,15 +16,18 @@
     </header>
     <main>
         <div class="container">
-            <canvas id="maincanvas"></canvas>
+            <div id="flexcanvas">
+                <canvas id="maincanvas"></canvas>
+                <canvas id="nextcanvas"></canvas>
+            </div>
             <div id="UI">
                 <p>点数</p>
                 <p>秒数</p>
                 <p>連鎖数リスト</p>
                 <div class="container">
-                    <button>←</button>
-                    <button>❚❚</button>
-                    <button>→</button>
+                    <button id="back">←</button>
+                    <button id="stop">❚❚</button>
+                    <button id="advance">→</button>
                 </div>  
                 <button id="newgame">newgame</button>
             </div>

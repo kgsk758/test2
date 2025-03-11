@@ -28,7 +28,7 @@ footer{
 .container div{
     color: white;
 }
-.container canvas{
+#maincanvas{
     background-color: rgb(40, 53, 52);
 }
 footer div{
@@ -37,11 +37,6 @@ footer div{
         font-size: 2vw;
     }
 }
-/*.non_stretch{
-    align-self: flex-start;
-    align-self: center;
-    width: 10%;
-}*/
 .non_stretch{
     align-self: center;
     width: 10%;
@@ -68,7 +63,6 @@ footer div{
         margin: 4px;
     }
     background: rgba(255, 255, 255, 0.2);
-    /*border: 2px solid rgba(255, 255, 255, 0.5);*/
     color: white;
     outline: none;
     transition: all 0.3s ease;
@@ -93,4 +87,10 @@ footer div{
 }
 #credit p{
     margin: 2px;
+}
+#nextcanvas{
+    background-color: white;
+}
+#flexcanvas{
+    display: flex;
 }
