@@ -41,6 +41,9 @@ if(width <= 480){
 }
 //タッチ処理
 document.addEventListener("touchstart", (event)=>{
+    if (event.target.tagName === "BUTTON") {
+        return; // ボタンなら無視
+    }
     let touch = event.touches[0];
     touchpos.x = touch.clientX;
     touchpos.y = touch.clientY;
@@ -49,12 +52,18 @@ document.addEventListener("touchstart", (event)=>{
     touchpos.state = "touched";
 })
 document.addEventListener("touchmove", (event)=>{
+    if (event.target.tagName === "BUTTON") {
+        return; // ボタンなら無視
+    }
     let touch = event.touches[0];
     touchpos.x = touch.clientX;
     touchpos.y = touch.clientY;
     touchpos.state = "touched";
 })
 document.addEventListener("touchend", (event)=>{
+    if (event.target.tagName === "BUTTON") {
+        return; // ボタンなら無視
+    }
     let touch = event.changedTouches[0];
     if(Date.now() - time < touchTime && Math.abs(firsttouchpos.x - touch.clientX) < SIZE / 3 && Math.abs(firsttouchpos.y - touch.clientY) < SIZE / 3){
         //タップ
