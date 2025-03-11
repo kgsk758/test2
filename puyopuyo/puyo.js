@@ -45,8 +45,8 @@ document.addEventListener("touchmove", (event)=>{
     touchpos.state = "touched";
 })
 document.addEventListener("touchend", (event)=>{
-    let touch = event.touches[0];
-    if(Date.now() - time < touchTime && firsttouchpos.x == touch.clientX && firsttouchpos.y == touch.clientY){
+    let touch = event.changedTouches[0];
+    if(Date.now() - time < touchTime && Math.abs(firsttouchpos.x - touch.clientX) < SIZE / 3 && Math.abs(firsttouchpos.y - touch.clientY) < SIZE / 3){
         //タップ
         console.log("tap");
     }else{
@@ -62,10 +62,9 @@ document.addEventListener("touchend", (event)=>{
 
 //ずっと処理
 function mainroop(){
-    if(touchpos.state = "untouched"){
+    if(touchpos.state == "untouched"){
         time = Date.now();
     }
-    console.log(touchpos);
     requestAnimationFrame(mainroop);
 }
 requestAnimationFrame(mainroop);
