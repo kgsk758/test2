@@ -2,8 +2,6 @@
 let time = Date.now();
 const canvas = document.getElementById("maincanvas"); //canvas取得
 const ctx = canvas.getContext("2d");
-const nextcanvas = document.getElementById("nextcanvas") //nextcanvas取得
-const nextctx = canvas.getContext("2d");
 ctx.clearRect(0, 0, canvas.width, canvas.height); //画面をクリア
 const allpuyo = new Image(); //ぷよスタイルシート取得
 allpuyo.src = "puyoimage/allpuyo.png";
@@ -33,7 +31,10 @@ let firsttouchpos = { //スワイプ処理用
 let touchTime = 250; //これ以上長押しするとタップにならない
 const width = window.innerWidth; //デバイス判別用
 console.log(width);
-if(width <= 480){
+const nextcanvas = document.createElement("canvas"); //next用のcanvas要素を生成
+nextcanvas.style.backgroundColor = "white";
+if(width <= 480){ //スマホ
+    document.getElementById("UI").prepend(nextcanvas); //スマホならUIの上(最初)にnextcanvas要素追加
     canvas.style.width = `${COLUMNS*SIZE}px`;
     canvas.style.height = `${(ROWS-2)*SIZE}px`;
     canvas.width = COLUMNS*SIZE;
@@ -42,8 +43,9 @@ if(width <= 480){
     nextcanvas.style.height = `${4*SIZE}px`;
     nextcanvas.width = SIZE;
     nextcanvas.height = 4*SIZE;
-}else{
+}else{ //パソコンタブレット
     SIZE += 3; //パソコン、タブレットの時のマスの大きさ
+    document.getElementById("flexcanvas").appendChild(nextcanvas); //パソコンタブレットならflexcanvasの最後に追加
     canvas.style.width = `${COLUMNS*SIZE}px`;
     canvas.style.height = `${(ROWS-2)*SIZE}px`;
     canvas.width = COLUMNS*SIZE;
