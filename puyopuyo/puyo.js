@@ -17,7 +17,7 @@ let limit = 0; //ぷよが設置されるまでの時間
 let limitmanage = "off"; //ぷよ設置管理用
 let dropmanage = 0; //何連続落ちたか
 let limitTime = 0; //接地処理秒数カウント用
-let limitOffSet = 0; //接地処理用
+let limitpreserve = 0; //接地処理用
 let pos = { //軸ぷよの座標,回転ぷよ,色
     x: 0, //ぷよの縦の列の位置
     y: 0, //ぷよの横の列の位置
@@ -332,20 +332,21 @@ function mainroop(){
         intervaltime = Date.now();
         droppuyo();
     }
-    if(dropmanage >= 2){ //操作ぷよが2連続で下に進んだとき
+    if(dropmanage >= 2){ //操作ぷよが2連続で下に進んだときlimitを元の値にリセット
         limit = interval*2; //ぷよが設置されるまでの時間
     }
     if(isValid(pos.x, pos.y + 1) == "notEmpty"){ //接地している時にlimitmanageを"on"にする
         if(limitmanage == "off"){ //"off"から"on"に切り替わる時
-            limitTime = Date.now();
-            limitOffSet = limit;
+            limitTime = Date.now(); //接地した瞬間limitをlimitpreserveに保存
+            limitpreserve = limit; //接地した瞬間の時間をlimitTimeに保存
         }
-        limitmanage = "on";
-        limit = limitOffSet - (Date.now() - limitTime);
+        limitmanage = "on"; //接地している間はlimitpreserveから接地してから経った時間を引いた値をlimitに代入する
+        limit = limitpreserve - (Date.now() - limitTime); //limitがリセットされない限りひかれ続ける
+
     }else{
         limitmanage = "off";
     }
-    if(limit < 0){
+    if(limit < 0){ //limitがゼロより小さくなった時接地とする
         console.log("接地！");
     }
     console.log(limit);
