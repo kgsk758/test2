@@ -13,7 +13,11 @@ const colorlist = ["red", "green", "blue", "yellow", "purple"];
 const interval = 250; //ぷよの落下速度(遅い)
 const fastinterval = 125; //ぷよの落下速度(速い)
 let next = [null, null, null, null] //next 0: ネクストの軸 1: ネクストの回転ぷよ 2,3: ネクネク
-
+let limit = 0; //ぷよが設置されるまでの時間
+let limitmanage = "off"; //ぷよ設置管理用
+let dropmanage = 0; //何連続落ちたか
+let limitTime = 0; //接地処理秒数カウント用
+let limitOffSet = 0; //接地処理用
 let pos = { //軸ぷよの座標,回転ぷよ,色
     x: 0, //ぷよの縦の列の位置
     y: 0, //ぷよの横の列の位置
@@ -239,6 +243,9 @@ function newgame(){
     generatepuyo();
 }
 function generatepuyo(){ //盤面の上部に操作するぷよを生成
+    limitmanage = "off"; //接地処理用
+    dropmanage = 0; //何連続落ちたか
+    limit = interval*2; //ぷよが設置されるまでの時間
     pos.x = 2; //軸ぷよの縦の列
     pos.y = -0.5; //軸ぷよの横の列
     pos.sub = 1; //回転ぷよを上に
@@ -249,13 +256,36 @@ function generatepuyo(){ //盤面の上部に操作するぷよを生成
     next[2] = thiscolor[Math.floor(Math.random()*4)]; //新しいネクストを生成
     next[3] = thiscolor[Math.floor(Math.random()*4)];
     render();
-
-
-
 }
 function droppuyo(){
-    pos.y += 0.5;
+    dropmanage++;
+    pos.y += 0.5; //落下
+    if(Math.floor(pos.y) != pos.y){ //もし中途半端なマスにいるとき
+        if(isValid(pos.x, pos.y + 0.5) == "notEmpty"){ //pos.yの下にあるマスが空じゃない時
+            pos.y -= 0.5; //戻す
+            dropmanage = 0;
+
+        }
+    }
+    console.log(dropmanage);
     render();
+}
+function isValid(x, y){
+    if(Math.floor(y) == y){ //pos.yが整数の時でなければならない
+        if(tile.some(tile => tile.color == null && tile.row == y && tile.column == x)){ //軸ぷよが空のマスにいる
+            if(tile.some(tile => tile.color == null && tile.row == y - Math.sin(pos.sub*(Math.PI/2)) && tile.column == x + Math.cos(pos.sub*(Math.PI/2)))){ //回転ぷよが空のマスにいる
+                return true;
+            }else{
+                
+                return "notEmpty";
+            }
+        }else{
+            return "notEmpty";
+        }
+    }
+}
+function fix(){
+
 }
 function render(){
     ctx.clearRect(0, 0, canvas.width, canvas.height); // 画面をクリア
@@ -302,6 +332,24 @@ function mainroop(){
         intervaltime = Date.now();
         droppuyo();
     }
+    if(dropmanage >= 2){ //操作ぷよが2連続で下に進んだとき
+        limit = interval*2; //ぷよが設置されるまでの時間
+    }
+    if(isValid(pos.x, pos.y + 1) == "notEmpty"){ //接地している時にlimitmanageを"on"にする
+        if(limitmanage == "off"){ //"off"から"on"に切り替わる時
+            limitTime = Date.now();
+            limitOffSet = limit;
+        }
+        limitmanage = "on";
+        limit = limitOffSet - (Date.now() - limitTime);
+    }else{
+        limitmanage = "off";
+    }
+    if(limit < 0){
+        console.log("接地！");
+    }
+    console.log(limit);
+    console.log(limitmanage);
     requestAnimationFrame(mainroop);
 }
 allpuyo.onload = () => { //ぷよスプライトシートが読み込まれてから
