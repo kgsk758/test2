@@ -12,6 +12,7 @@ let tile = []; //盤面用
 const colorlist = ["red", "green", "blue", "yellow", "purple"];
 const interval = 250; //ぷよの落下速度(遅い)
 const fastinterval = 125; //ぷよの落下速度(速い)
+let next = [null, null, null, null] //next 0: ネクストの軸 1: ネクストの回転ぷよ 2,3: ネクネク
 
 let pos = { //軸ぷよの座標,回転ぷよ,色
     x: 0, //ぷよの縦の列の位置
@@ -32,7 +33,8 @@ let touchTime = 250; //これ以上長押しするとタップにならない
 const width = window.innerWidth; //デバイス判別用
 console.log(width);
 const nextcanvas = document.createElement("canvas"); //next用のcanvas要素を生成
-nextcanvas.style.backgroundColor = "white";
+nextcanvas.style.backgroundColor = "rgb(40, 53, 52)";
+const nextctx = nextcanvas.getContext("2d");
 if(width <= 480){ //スマホ
     document.getElementById("UI").prepend(nextcanvas); //スマホならUIの上(最初)にnextcanvas要素追加
     canvas.style.width = `${COLUMNS*SIZE}px`;
@@ -40,20 +42,22 @@ if(width <= 480){ //スマホ
     canvas.width = COLUMNS*SIZE;
     canvas.height = (ROWS-2)*SIZE;
     nextcanvas.style.width = `${SIZE}px`; //next
-    nextcanvas.style.height = `${4*SIZE}px`;
+    nextcanvas.style.height = `${5*SIZE}px`;
     nextcanvas.width = SIZE;
-    nextcanvas.height = 4*SIZE;
+    nextcanvas.height = 5*SIZE;
 }else{ //パソコンタブレット
     SIZE += 3; //パソコン、タブレットの時のマスの大きさ
-    document.getElementById("flexcanvas").appendChild(nextcanvas); //パソコンタブレットならflexcanvasの最後に追加
+    const flexcanvas = document.getElementById("flexcanvas");
+    flexcanvas.appendChild(nextcanvas); //パソコンタブレットならflexcanvasの最後にnextcanvas追加
+    nextcanvas.style.marginLeft = "10px";
     canvas.style.width = `${COLUMNS*SIZE}px`;
     canvas.style.height = `${(ROWS-2)*SIZE}px`;
     canvas.width = COLUMNS*SIZE;
     canvas.height = (ROWS-2)*SIZE;
     nextcanvas.style.width = `${SIZE}px`; //next
-    nextcanvas.style.height = `${4*SIZE}px`;
+    nextcanvas.style.height = `${5*SIZE}px`;
     nextcanvas.width = SIZE;
-    nextcanvas.height = 4*SIZE;
+    nextcanvas.height = 5*SIZE;
 }
 //nextcanvas.style.top = `${canvas.offsetTop}px`;
 //nextcanvas.style.left = `${canvas.offsetLeft + SIZE*COLUMNS}px`;
@@ -95,7 +99,6 @@ document.addEventListener("touchend", (event)=>{
 })
 //ぷよ描画
 function drawpuyo(color, row, column, state){
-    console.log(state);
     let spriteRow = 0;
     let spriteColumn = 0;
     switch(color){ //色によってスプライトシートの縦の列を決める
@@ -113,10 +116,12 @@ function drawpuyo(color, row, column, state){
             break;
         case "purple":
             spriteColumn = 4;
-            break; 
+            break;
+        default: //color == nullの場合 
+
     }
     //隣の同色のぷよの位置(stateオブジェクト)によってスプライトシートの横の列を決める
-    if(state == "vanish"){
+    if (state == "vanish"){
         spriteRow = spriteColumn + 5; //消えるエフェクトの色を指定
         spriteColumn = 5;
     }else{
@@ -145,13 +150,54 @@ function drawpuyo(color, row, column, state){
             // マッピングオブジェクトを使って値を取得
         spriteRow = spriteRows[stateKey] || 0;  // 見つからなければ0をデフォルト
     }
-    console.log(spriteRow);
-    ctx.drawImage(allpuyo,
-        spriteColumn*32, spriteRow*32 - 1, 32, 32, // スプライトシートの切り取り位置 (sx, sy, sw, sh)
-        column*SIZE, row*SIZE, SIZE, SIZE // `canvas` 上の描画位置とサイズ (dx, dy, dw, dh)
+    if(color != null){ //空のマスでない場合
+        ctx.drawImage(allpuyo,
+            spriteColumn*32, spriteRow*32 - 1, 32, 32, // スプライトシートの切り取り位置 (sx, sy, sw, sh)
+            column*SIZE, row*SIZE, SIZE, SIZE // `canvas` 上の描画位置とサイズ (dx, dy, dw, dh)
+        )
+    }
+
+}
+//nextのぷよ描画
+function drawnext(number, color){ //number 0:軸1  1:回転1  2:軸2  3:回転2
+    let spriteColumn = 0;
+    let drawrow = 0;
+    switch(number){
+        case 0:
+            drawrow = 1;
+            break;
+        case 1:
+            drawrow = 0;
+            break;
+        case 2:
+            drawrow = 4;
+            break;
+        case 3:
+            drawrow = 3;
+            break;
+    }
+    switch(color){ //色によってスプライトシートの縦の列を決める
+        case "red":
+            spriteColumn = 0;
+            break;
+        case "green":
+            spriteColumn = 1;
+            break;
+        case "blue":
+            spriteColumn = 2;
+            break;
+        case "yellow":
+            spriteColumn = 3;
+            break;
+        case "purple":
+            spriteColumn = 4;
+            break;
+        default: //color == nullの場合 
+    }
+    nextctx.drawImage(allpuyo,
+        spriteColumn*32, -1, 32, 32,
+        0, drawrow*SIZE, SIZE, SIZE
     )
-
-
 }
 
 
@@ -165,8 +211,14 @@ function newgame(){
     intervaltime = Date.now(); //操作ぷよ自然落下管理用
     let randomFour = colorlist.sort(() => Math.random() - 0.5).slice(0, 4); //5つの色からランダムに4つ選ぶ
     thiscolor = [...randomFour]; //今回のゲームに使われる四色
-    console.log(thiscolor);
+    let randomthree = randomFour.sort(() => Math.random() - 0.5).slice(0, 3); //4つの色からランダムに3つ選ぶ
+    for(let i = 0; i < 4; i++){ //Nextの数だけ繰り返し
+        //ネクスト初期化
+
+        next[i] = randomthree[Math.floor(Math.random()*3)]; //最初のネクスト四つは三色以内
+    }
     ctx.clearRect(0, 0, canvas.width, canvas.height); // 画面をクリア
+    nextctx.clearRect(0, 0, nextcanvas.width, nextcanvas.height);
     tile = [];
     //盤面
     for(let n = 0; n < ROWS; n++){
@@ -184,19 +236,61 @@ function newgame(){
             });
         }
     }
-    console.log(tile);
     generatepuyo();
 }
 function generatepuyo(){ //盤面の上部に操作するぷよを生成
     pos.x = 2; //軸ぷよの縦の列
-    pos.y = -1; //軸ぷよの横の列
+    pos.y = -0.5; //軸ぷよの横の列
     pos.sub = 1; //回転ぷよを上に
-    
+    pos.colors[0] = next[0]; //軸ぷよの色をネクストの0に
+    pos.colors[1] = next[1]; //回転ぷよの色をネクストの1に
+    next[0] = next[2]; //ネクストを移動
+    next[1] = next[3];
+    next[2] = thiscolor[Math.floor(Math.random()*4)]; //新しいネクストを生成
+    next[3] = thiscolor[Math.floor(Math.random()*4)];
+    render();
+
 
 
 }
 function droppuyo(){
-    //drawpuyo();
+    pos.y += 0.5;
+    render();
+}
+function render(){
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // 画面をクリア
+    nextctx.clearRect(0, 0, nextcanvas.width, nextcanvas.height);
+    let j = 0; //リスト番号指定用
+    for(let n = 0; n < ROWS; n++){ //盤面の描画
+        for(let m = 0; m < COLUMNS; m++){
+            drawpuyo(tile[j].color, tile[j].row, tile[j].column, tile[j].state);
+            j++;
+        }
+    }
+    for(let i = 0; i < 4; i++){ //next描画
+        drawnext(i, next[i]);
+    }
+    //操作ぷよ描画
+    drawpuyo( //軸ぷよ
+        pos.colors[0], pos.y, pos.x, {
+            right: null,
+            above: null,
+            left: null,
+            below: null
+        }
+    );
+    drawpuyo( //回転ぷよ
+        pos.colors[1], 
+        pos.y - Math.sin(pos.sub*(Math.PI/2)),
+        pos.x + Math.cos(pos.sub*(Math.PI/2)),
+        {
+            right: null,
+            above: null,
+            left: null,
+            below: null
+        }
+
+    );
 }
 
 //ずっと処理
@@ -210,7 +304,9 @@ function mainroop(){
     }
     requestAnimationFrame(mainroop);
 }
-newgame(); //ゲーム自動開始
+allpuyo.onload = () => { //ぷよスプライトシートが読み込まれてから
+    newgame(); //ゲーム自動開始
+}
 requestAnimationFrame(mainroop); //メインループ開始
 
 
