@@ -107,6 +107,13 @@ document.addEventListener("touchend", (event)=>{
     if(Date.now() - time < touchTime && Math.abs(firsttouchpos.x - touch.clientX) < SIZE / 3 && Math.abs(firsttouchpos.y - touch.clientY) < SIZE / 3){
         //タップ
         console.log(touch.clientX);
+        if(clientX >= width/2){ //タップの座標が画面の半分より大きいか
+            //右側タップ
+            rotation("right");
+        }else{
+            //左側タップ
+            rotation("left");
+        }
     }else{
         //スワイプ
     }
@@ -231,7 +238,6 @@ function newgame(){
     let randomthree = randomFour.sort(() => Math.random() - 0.5).slice(0, 3); //4つの色からランダムに3つ選ぶ
     for(let i = 0; i < 4; i++){ //Nextの数だけ繰り返し
         //ネクスト初期化
-
         next[i] = randomthree[Math.floor(Math.random()*3)]; //最初のネクスト四つは三色以内
     }
     ctx.clearRect(0, 0, canvas.width, canvas.height); // 画面をクリア
@@ -385,6 +391,63 @@ document.addEventListener("keydown", event => { //キーボード操作
 
     }
 })
+function rotation(RorL){ //スマホ用回転
+    if(isRotating == false){
+        rotateManage = 0;
+        switch(RorL){
+            case "left": //左回転処理
+                rotateManage = 1;
+                break;
+            case "right": //右回転処理
+                rotateManage = -1;
+                break;
+        }
+        animationDt.dx = 0; //滑らかに移動する用
+        animationDt.dy = 0;
+        limit = interval*2 //仮に回転で接地判定をリセットする
+        pos.sub += rotateManage; //判定用回転ぷよを回転
+        pos.virtualsub += rotateManage; //仮想回転ぷよを回転
+        if(Math.floor(pos.y) == pos.y){ //もしy座標が整数なら
+            if(isValid(subpuyo(pos.virtualsub, pos.x, pos.y).subX, subpuyo(pos.virtualsub, pos.x, pos.y).subY) == true){
+                //回転成功
+                isRotating = true;
+                pos.sub = pos.virtualsub;
+            }else if(isValid(subpuyo(pos.virtualsub + 2, pos.x, pos.y).subX, subpuyo(pos.virtualsub + 2, pos.x, pos.y).subY) == true){
+                //回転方向に障害物　回転の反対方向に空あり　回転成功
+                isRotating = true;
+                pos.sub = pos.virtualsub;
+                animationDt.dx = -1 * (Math.round(1000*Math.cos(pos.sub*(Math.PI/2)))/1000); 
+                animationDt.dy = Math.round(1000*Math.sin(pos.sub*(Math.PI/2)))/1000;
+                //反対方向に一マス移動
+                pos.x -= Math.round(1000*Math.cos(pos.sub*(Math.PI/2)))/1000; 
+                pos.y += Math.round(1000*Math.sin(pos.sub*(Math.PI/2)))/1000;
+            }else{
+                //回転失敗
+                pos.sub -= rotateManage;
+            }
+        }else{ //もしy座標が中途半端なら半分下としてマスを調べる
+            if(isValid(subpuyo(pos.virtualsub, pos.x, pos.y + 0.5).subX, subpuyo(pos.virtualsub, pos.x, pos.y + 0.5).subY) == true){
+                //回転成功
+                isRotating = true;
+                pos.sub = pos.virtualsub;
+            }else if(isValid(subpuyo(pos.virtualsub + 2, pos.x, pos.y + 0.5).subX, subpuyo(pos.virtualsub + 2, pos.x, pos.y + 0.5).subY) == true){
+                //回転方向に障害物　回転の反対方向に空あり　回転成功
+                isRotating = true;
+                pos.sub = pos.virtualsub;
+                animationDt.dx = -1 * (Math.round(1000*Math.cos(pos.sub*(Math.PI/2)))/1000); 
+                animationDt.dy = 0.5 * Math.round(1000*Math.sin(pos.sub*(Math.PI/2)))/1000;
+                //反対方向に一マス移動
+                pos.x -= Math.round(1000*Math.cos(pos.sub*(Math.PI/2)))/1000; 
+                pos.y += 0.5*(Math.round(1000*Math.sin(pos.sub*(Math.PI/2)))/1000);
+            }else{
+                //回転失敗
+                pos.sub -= rotateManage;
+            }
+        }
+        rotateManage = pos.virtualsub - pos.drawsub;
+        render()
+    }
+}
 function fix(){
 
 }
