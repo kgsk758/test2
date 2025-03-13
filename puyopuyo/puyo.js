@@ -92,7 +92,7 @@ document.addEventListener("touchstart", (event)=>{
     firsttouchpos.y = touch.clientY;
     touchpos.state = "touched";
     tapPreserve = Math.floor(touch.clientX/SIZE);
-    xPreserve = Math.floor(touch.clientX/SIZE);
+    xPreserve = pos.x;
 })
 document.addEventListener("touchmove", (event)=>{ //指が触れながら動く度呼び出される
     if (event.target.tagName === "BUTTON") {
