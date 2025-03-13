@@ -107,7 +107,7 @@ document.addEventListener("touchend", (event)=>{
     if(Date.now() - time < touchTime && Math.abs(firsttouchpos.x - touch.clientX) < SIZE / 3 && Math.abs(firsttouchpos.y - touch.clientY) < SIZE / 3){
         //タップ
         console.log(touch.clientX);
-        if(touchclientX >= width/2){ //タップの座標が画面の半分より大きいか
+        if(touch.clientX >= width/2){ //タップの座標が画面の半分より大きいか
             //右側タップ
             rotation("right");
         }else{
