@@ -21,6 +21,8 @@ let limitTime = 0; //接地処理秒数カウント用
 let limitpreserve = 0; //接地処理用
 let isRotating = false; //回転中か
 let rotateSpeed = 50; //四分の一回転にかかるミリ秒
+let tapPreserve = 0; //スワイプした瞬間の指の座標を保存
+let xPreserve = 0; //スワイプした瞬間の操作ぷよの座標を保存
 let k = 0;
 let animationDt = { //アニメーションで移動する距離
     dx: 0,
@@ -89,6 +91,8 @@ document.addEventListener("touchstart", (event)=>{
     firsttouchpos.x = touch.clientX;
     firsttouchpos.y = touch.clientY;
     touchpos.state = "touched";
+    tapPreserve = Math.floor(touch.clientX/SIZE);
+    xPreserve = Math.floor(touch.clientX/SIZE);
 })
 document.addEventListener("touchmove", (event)=>{ //指が触れながら動く度呼び出される
     if (event.target.tagName === "BUTTON") {
@@ -98,6 +102,9 @@ document.addEventListener("touchmove", (event)=>{ //指が触れながら動く�
     touchpos.x = touch.clientX;
     touchpos.y = touch.clientY;
     touchpos.state = "touched";
+    pos.x = xPreserve + Math.floor(touch.clientX/SIZE) - tapPreserve;
+    pos.drawX = xPreserve + Math.floor(touch.clientX/SIZE) - tapPreserve;
+    render();
 })
 document.addEventListener("touchend", (event)=>{
     if (event.target.tagName === "BUTTON") {
