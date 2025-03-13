@@ -65,7 +65,7 @@ if(width <= 480){ //スマホ
     nextcanvas.width = SIZE;
     nextcanvas.height = 5*SIZE;
 }else{ //パソコンタブレット
-    SIZE += 3; //パソコン、タブレットの時のマスの大きさ
+    SIZE += 4; //パソコン、タブレットの時のマスの大きさ
     const flexcanvas = document.getElementById("flexcanvas");
     flexcanvas.appendChild(nextcanvas); //パソコンタブレットならflexcanvasの最後にnextcanvas追加
     nextcanvas.style.marginLeft = "10px";
@@ -91,7 +91,7 @@ document.addEventListener("touchstart", (event)=>{
     firsttouchpos.x = touch.clientX;
     firsttouchpos.y = touch.clientY;
     touchpos.state = "touched";
-    tapPreserve = Math.floor(touch.clientX/SIZE);
+    tapPreserve = Math.floor(touch.clientX/(SIZE*0.75));
     xPreserve = pos.x;
 })
 document.addEventListener("touchmove", (event)=>{ //指が触れながら動く度呼び出される
@@ -102,13 +102,13 @@ document.addEventListener("touchmove", (event)=>{ //指が触れながら動く�
     touchpos.x = touch.clientX;
     touchpos.y = touch.clientY;
     touchpos.state = "touched";
-    let xTemp = xPreserve + Math.floor(touch.clientX/SIZE) - tapPreserve;
+    let xTemp = xPreserve + (Math.floor(touch.clientX/(SIZE*0.75)) - tapPreserve);
     if(isValid(xTemp, Math.ceil(pos.y)) == "notEmpty" || isValid(subpuyo(pos.sub, xTemp, pos.y).subX, Math.ceil(subpuyo(pos.sub, xTemp, pos.y).subY)) == "notEmpty"){
         xPreserve = pos.x;
-        tapPreserve = Math.floor(touch.clientX/SIZE);
+        tapPreserve = Math.floor(touch.clientX/(SIZE*0.75));
     }else{
-        pos.x = xPreserve + Math.floor(touch.clientX/SIZE) - tapPreserve;
-        pos.drawX = xPreserve + Math.floor(touch.clientX/SIZE) - tapPreserve;
+        pos.x = xTemp;
+        pos.drawX = xTemp;
     }
     render();
 })
@@ -272,14 +272,16 @@ function newgame(){
             });
         }
     }
-    tile[19].color = "red";
-    tile[21].color = "red";
-    tile[25].color = "red";
-    tile[27].color = "red";
-    tile[31].color = "red";
-    tile[33].color = "red";
-    tile[37].color = "red";
-    tile[39].color = "red";
+    tile[76].color = "red";
+    tile[82].color = "red";
+    tile[73].color = "red";
+    tile[75].color = "red";
+    tile[79].color = "red";
+    tile[81].color = "red";
+    tile[67].color = "red";
+    tile[69].color = "red";
+    tile[49].color = "red";
+    tile[51].color = "red";
     generatepuyo();
 }
 function generatepuyo(){ //盤面の上部に操作するぷよを生成
