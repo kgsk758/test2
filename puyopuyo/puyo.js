@@ -102,19 +102,13 @@ document.addEventListener("touchmove", (event)=>{ //指が触れながら動く�
     touchpos.x = touch.clientX;
     touchpos.y = touch.clientY;
     touchpos.state = "touched";
-    pos.x = xPreserve + Math.floor(touch.clientX/SIZE) - tapPreserve;
-    pos.drawX = xPreserve + Math.floor(touch.clientX/SIZE) - tapPreserve;
-    if(pos.x < 0){
-        pos.x = 0;
-        pos.drawX = 0;
-        xPreserve = 0;
+    let xTemp = xPreserve + Math.floor(touch.clientX/SIZE) - tapPreserve;
+    if(isValid(xTemp, Math.ceil(pos.y)) == "notEmpty" || isValid(subpuyo(pos.sub, xTemp, pos.y).subX, Math.ceil(subpuyo(pos.sub, xTemp, pos.y).subY)) == "notEmpty"){
+        xPreserve = pos.x;
         tapPreserve = Math.floor(touch.clientX/SIZE);
-    }
-    if(pos.x > COLUMNS - 1){
-        pos.x = COLUMNS - 1;
-        pos.drawX = COLUMNS - 1;
-        xPreserve = COLUMNS - 1;
-        tapPreserve = Math.floor(touch.clientX/SIZE);
+    }else{
+        pos.x = xPreserve + Math.floor(touch.clientX/SIZE) - tapPreserve;
+        pos.drawX = xPreserve + Math.floor(touch.clientX/SIZE) - tapPreserve;
     }
     render();
 })
