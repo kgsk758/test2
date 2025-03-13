@@ -1,5 +1,6 @@
 //初期設定
 let time = Date.now();
+let rotateTimer = 0;
 const canvas = document.getElementById("maincanvas"); //canvas取得
 const ctx = canvas.getContext("2d");
 ctx.clearRect(0, 0, canvas.width, canvas.height); //画面をクリア
@@ -12,17 +13,29 @@ let tile = []; //盤面用
 const colorlist = ["red", "green", "blue", "yellow", "purple"];
 const interval = 250; //ぷよの落下速度(遅い)
 const fastinterval = 125; //ぷよの落下速度(速い)
-let next = [null, null, null, null] //next 0: ネクストの軸 1: ネクストの回転ぷよ 2,3: ネクネク
+let next = [null, null, null, null] //next 0:ネクストの軸  1:ネクストの回転ぷよ  2,3:ネクネク
 let limit = 0; //ぷよが設置されるまでの時間
 let limitmanage = "off"; //ぷよ設置管理用
 let dropmanage = 0; //何連続落ちたか
 let limitTime = 0; //接地処理秒数カウント用
 let limitpreserve = 0; //接地処理用
+let isRotating = false; //回転中か
+let rotateSpeed = 50; //四分の一回転にかかるミリ秒
+let k = 0;
+let animationDt = { //アニメーションで移動する距離
+    dx: 0,
+    dy: 0
+}
+let rotateManage = 0;
 let pos = { //軸ぷよの座標,回転ぷよ,色
     x: 0, //ぷよの縦の列の位置
     y: 0, //ぷよの横の列の位置
-    sub: 0, //回るぷよ 0: 右 1: 上 2: 左 3: 下
-    colors: ["red", "red"] //ぷよの色 0: 軸ぷよ 1: 回転ぷよ
+    drawX: 0, //描画用x
+    drawY: 0, //描画用y
+    sub: 0, //判定用の回るぷよ 0:右  1:上  2:左  3:下 
+    drawsub: 0, //描画用の回るぷよ
+    virtualsub: 0, //仮想の回るぷよ
+    colors: ["red", "red"] //ぷよの色 0:軸ぷよ  1:回転ぷよ
 };
 let touchpos = { //タップの座標
     x: null,
@@ -93,7 +106,7 @@ document.addEventListener("touchend", (event)=>{
     let touch = event.changedTouches[0];
     if(Date.now() - time < touchTime && Math.abs(firsttouchpos.x - touch.clientX) < SIZE / 3 && Math.abs(firsttouchpos.y - touch.clientY) < SIZE / 3){
         //タップ
-
+        console.log(touch.clientX);
     }else{
         //スワイプ
     }
@@ -240,15 +253,28 @@ function newgame(){
             });
         }
     }
+    tile[19].color = "red";
+    tile[21].color = "red";
+    tile[25].color = "red";
+    tile[27].color = "red";
+    tile[31].color = "red";
+    tile[33].color = "red";
+    tile[37].color = "red";
+    tile[39].color = "red";
     generatepuyo();
 }
 function generatepuyo(){ //盤面の上部に操作するぷよを生成
+    isRotating = false; //回転中か
     limitmanage = "off"; //接地処理用
     dropmanage = 0; //何連続落ちたか
     limit = interval*2; //ぷよが設置されるまでの時間
     pos.x = 2; //軸ぷよの縦の列
     pos.y = -0.5; //軸ぷよの横の列
-    pos.sub = 1; //回転ぷよを上に
+    pos.drawX = 2; //描画用x
+    pos.drawY = -0.5; //描画用y
+    pos.sub = 1; //判定用回転ぷよを上に
+    pos.drawsub = 1; //描画用回転ぷよを上に
+    pos.virtualsub = 1; //仮想回転ぷよを上に
     pos.colors[0] = next[0]; //軸ぷよの色をネクストの0に
     pos.colors[1] = next[1]; //回転ぷよの色をネクストの1に
     next[0] = next[2]; //ネクストを移動
@@ -258,38 +284,113 @@ function generatepuyo(){ //盤面の上部に操作するぷよを生成
     render();
 }
 function droppuyo(){
-    dropmanage++;
+    dropmanage++; //連続落下数を加算
     pos.y += 0.5; //落下
-    if(Math.floor(pos.y) != pos.y){ //もし中途半端なマスにいるとき
-        if(isValid(pos.x, pos.y + 0.5) == "notEmpty"){ //pos.yの下にあるマスが空じゃない時
+    pos.drawY += 0.5;
+    if(Math.floor(pos.y) != pos.y){ //もしyが中途半端なマスにいるとき
+        if(isValid(pos.x, pos.y + 0.5) == "notEmpty" || isValid(subpuyo(pos.sub, pos.x, pos.y).subX, subpuyo(pos.sub, pos.x, pos.y).subY + 0.5) == "notEmpty"){ //軸ぷよか回転ぷよが埋まっているかどうか
             pos.y -= 0.5; //戻す
-            dropmanage = 0;
-
+            pos.drawY -= 0.5;
+            dropmanage = 0; //連続落下数をゼロにする
         }
     }
-    console.log(dropmanage);
     render();
 }
 function isValid(x, y){
-    if(Math.floor(y) == y){ //pos.yが整数の時でなければならない
-        if(tile.some(tile => tile.color == null && tile.row == y && tile.column == x)){ //軸ぷよが空のマスにいる
-            if(tile.some(tile => tile.color == null && tile.row == y - Math.sin(pos.sub*(Math.PI/2)) && tile.column == x + Math.cos(pos.sub*(Math.PI/2)))){ //回転ぷよが空のマスにいる
-                return true;
-            }else{
-                
-                return "notEmpty";
-            }
-        }else{
-            return "notEmpty";
-        }
+    if(tile.some(tile => tile.color == null && tile.row == y && tile.column == x)){ //対象の座標が空のマスか
+        return true;
+    }else{
+        return "notEmpty";
     }
 }
+document.addEventListener("keydown", event => { //キーボード操作
+    if(isRotating == false){
+        rotateManage = 0;
+        switch(event.key){
+            case "z": //左回転処理
+                rotateManage = 1;
+                break;
+            case "x": //右回転処理
+                rotateManage = -1;
+                break;
+        }
+    }
+    if((event.key == "z" || event.key == "x") && isRotating == false){
+        animationDt.dx = 0; //滑らかに移動する用
+        animationDt.dy = 0;
+        limit = interval*2 //仮に回転で接地判定をリセットする
+        pos.sub += rotateManage; //判定用回転ぷよを回転
+        pos.virtualsub += rotateManage; //仮想回転ぷよを回転
+        if(Math.floor(pos.y) == pos.y){ //もしy座標が整数なら
+            if(isValid(subpuyo(pos.virtualsub, pos.x, pos.y).subX, subpuyo(pos.virtualsub, pos.x, pos.y).subY) == true){
+                //回転成功
+                isRotating = true;
+                pos.sub = pos.virtualsub;
+            }else if(isValid(subpuyo(pos.virtualsub + 2, pos.x, pos.y).subX, subpuyo(pos.virtualsub + 2, pos.x, pos.y).subY) == true){
+                //回転方向に障害物　回転の反対方向に空あり　回転成功
+                isRotating = true;
+                pos.sub = pos.virtualsub;
+                animationDt.dx = -1 * (Math.round(1000*Math.cos(pos.sub*(Math.PI/2)))/1000); 
+                animationDt.dy = Math.round(1000*Math.sin(pos.sub*(Math.PI/2)))/1000;
+                //反対方向に一マス移動
+                pos.x -= Math.round(1000*Math.cos(pos.sub*(Math.PI/2)))/1000; 
+                pos.y += Math.round(1000*Math.sin(pos.sub*(Math.PI/2)))/1000;
+            }else{
+                //回転失敗
+                pos.sub -= rotateManage;
+            }
+        }else{ //もしy座標が中途半端なら半分下としてマスを調べる
+            if(isValid(subpuyo(pos.virtualsub, pos.x, pos.y + 0.5).subX, subpuyo(pos.virtualsub, pos.x, pos.y + 0.5).subY) == true){
+                //回転成功
+                isRotating = true;
+                pos.sub = pos.virtualsub;
+            }else if(isValid(subpuyo(pos.virtualsub + 2, pos.x, pos.y + 0.5).subX, subpuyo(pos.virtualsub + 2, pos.x, pos.y + 0.5).subY) == true){
+                //回転方向に障害物　回転の反対方向に空あり　回転成功
+                isRotating = true;
+                pos.sub = pos.virtualsub;
+                animationDt.dx = -1 * (Math.round(1000*Math.cos(pos.sub*(Math.PI/2)))/1000); 
+                animationDt.dy = 0.5 * Math.round(1000*Math.sin(pos.sub*(Math.PI/2)))/1000;
+                //反対方向に一マス移動
+                pos.x -= Math.round(1000*Math.cos(pos.sub*(Math.PI/2)))/1000; 
+                pos.y += 0.5*(Math.round(1000*Math.sin(pos.sub*(Math.PI/2)))/1000);
+            }else{
+                //回転失敗
+                pos.sub -= rotateManage;
+            }
+        }
+        rotateManage = pos.virtualsub - pos.drawsub;
+        render()
+    }
+    switch(event.key){
+        case "ArrowRight":
+            pos.x += 1;
+            pos.drawX += 1;
+            if(isValid(pos.x, Math.ceil(pos.y)) == "notEmpty" || isValid(subpuyo(pos.sub, pos.x, pos.y).subX, Math.ceil(subpuyo(pos.sub, pos.x, pos.y).subY)) == "notEmpty"){
+                pos.x -= 1;
+                pos.drawX -= 1;
+                console.log("failed");
+            }
+            render();
+            break;
+        case "ArrowLeft":
+            pos.x -= 1;
+            pos.drawX -= 1;
+            if(isValid(pos.x, Math.ceil(pos.y)) == "notEmpty" || isValid(subpuyo(pos.sub, pos.x, pos.y).subX, Math.ceil(subpuyo(pos.sub, pos.x, pos.y).subY)) == "notEmpty"){
+                pos.x += 1;
+                pos.drawX += 1;
+                console.log("failed");
+            }
+            render();
+            break;
+
+    }
+})
 function fix(){
 
 }
 function render(){
     ctx.clearRect(0, 0, canvas.width, canvas.height); // 画面をクリア
-    nextctx.clearRect(0, 0, nextcanvas.width, nextcanvas.height);
+    nextctx.clearRect(0, 0, nextcanvas.width, nextcanvas.height); //ネクスト画面をクリア
     let j = 0; //リスト番号指定用
     for(let n = 0; n < ROWS; n++){ //盤面の描画
         for(let m = 0; m < COLUMNS; m++){
@@ -302,7 +403,7 @@ function render(){
     }
     //操作ぷよ描画
     drawpuyo( //軸ぷよ
-        pos.colors[0], pos.y, pos.x, {
+        pos.colors[0], pos.drawY, pos.drawX, {
             right: null,
             above: null,
             left: null,
@@ -311,8 +412,8 @@ function render(){
     );
     drawpuyo( //回転ぷよ
         pos.colors[1], 
-        pos.y - Math.sin(pos.sub*(Math.PI/2)),
-        pos.x + Math.cos(pos.sub*(Math.PI/2)),
+        pos.drawY - Math.sin(pos.drawsub*(Math.PI/2)),
+        pos.drawX + Math.cos(pos.drawsub*(Math.PI/2)),
         {
             right: null,
             above: null,
@@ -322,7 +423,14 @@ function render(){
 
     );
 }
-
+function subpuyo(direction, x, y){ //回転ぷよの座標(subX, subY)を返す　引数は回転数と軸ぷよの座標(x, y)
+    let subpuyo_x = x + Math.round(1000*Math.cos(direction*(Math.PI/2)))/1000;
+    let subpuyo_y = y - Math.round(1000*Math.sin(direction*(Math.PI/2)))/1000;
+    return {
+        subX: subpuyo_x,
+        subY: subpuyo_y
+    }
+}
 //ずっと処理
 function mainroop(){
     if(touchpos.state == "untouched"){ //タップ,スワイプ判別処理
@@ -332,31 +440,58 @@ function mainroop(){
         intervaltime = Date.now();
         droppuyo();
     }
-    if(dropmanage >= 2){ //操作ぷよが2連続で下に進んだときlimitを元の値にリセット
+    if(dropmanage >= 3){ //操作ぷよが3連続で下に進んだときlimitを元の値にリセット
         limit = interval*2; //ぷよが設置されるまでの時間
     }
-    if(isValid(pos.x, pos.y + 1) == "notEmpty"){ //接地している時にlimitmanageを"on"にする
+    if(Math.floor(pos.y) == pos.y && (isValid(pos.x, pos.y + 1) == "notEmpty" || isValid(subpuyo(pos.sub, pos.x, pos.y).subX, subpuyo(pos.sub, pos.x, pos.y).subY + 1) == "notEmpty")){ //接地している時にlimitmanageを"on"にする
         if(limitmanage == "off"){ //"off"から"on"に切り替わる時
             limitTime = Date.now(); //接地した瞬間limitをlimitpreserveに保存
             limitpreserve = limit; //接地した瞬間の時間をlimitTimeに保存
+            dropmanage = 0;
         }
         limitmanage = "on"; //接地している間はlimitpreserveから接地してから経った時間を引いた値をlimitに代入する
         limit = limitpreserve - (Date.now() - limitTime); //limitがリセットされない限りひかれ続ける
-
+        intervaltime = Date.now(); //接地している間ぷよの落下を呼び出す間隔をリセット
+        //console.log("仮接地！");
     }else{
         limitmanage = "off";
     }
     if(limit < 0){ //limitがゼロより小さくなった時接地とする
-        console.log("接地！");
+        //console.log("接地！");
     }
-    console.log(limit);
-    console.log(limitmanage);
+    //console.log(limit);
+    //console.log(dropmanage);
+    if(isRotating == true){
+        k = 0;
+        rotateTimer = Date.now();
+        isRotating = "animation"
+    }
+    if(isRotating == "animation"){
+        if(k < 4){
+            if(Date.now() - rotateTimer > rotateSpeed/4){
+                pos.drawX += animationDt.dx/4;
+                pos.drawY += animationDt.dy/4;
+                rotateTimer = Date.now();
+                pos.drawsub += rotateManage/4;
+                k++;
+                render();
+            }
+        }else{
+            pos.drawX = pos.x;
+            pos.drawY = pos.y;
+            pos.drawsub = pos.sub;
+            isRotating = false;
+        }
+
+    }
+    //console.log(k);
+    //console.log(isRotating);
     requestAnimationFrame(mainroop);
 }
 allpuyo.onload = () => { //ぷよスプライトシートが読み込まれてから
     newgame(); //ゲーム自動開始
-}
-requestAnimationFrame(mainroop); //メインループ開始
+    requestAnimationFrame(mainroop); //メインループ開始
 
+}
 
 
