@@ -141,9 +141,9 @@ document.addEventListener("touchend", (event)=>{
 function moveCheck(x0, y0, x1, y1, direction){ //0:移動前座標  1:移動後座標
     if(Math.abs(x1 - x0) >= 1){
         let i = Math.sign(x1 - x0); //(x1 - x0) が正 =>1 負 =>-1
-        for(let n = 0; n < Math.abs(x1 - x0);){
+        for(let n = 0; Math.abs(n) < Math.abs(x1 - x0);){
             n += i;
-            if(isValid(x0 + n, y0) == "notEmpty" || isValid(subpuyo(direction, x0 + n, y0).subX, Math.ceil(subpuyo(direction, x0 + n, y0).subY)) == "notEmpty"){
+            if(isValid(x0 + n, Math.ceil(y0)) == "notEmpty" || isValid(subpuyo(direction, x0 + n, y0).subX, Math.ceil(subpuyo(direction, x0 + n, y0).subY)) == "notEmpty"){
                 return "notEmpty";
             }
         }
