@@ -114,7 +114,7 @@ document.addEventListener("touchmove", (event)=>{ //指が触れながら動く�
         pos.x = xTemp;
         pos.drawX = xTemp;
     }
-    if(firsttouchpos.y + SIZE < touchpos.x){
+    if(firsttouchpos.y + SIZE < touchpos.y){
         interval = fastinterval; //下にスワイプしたら高速落下
     }else{
         interval = slowinterval;
