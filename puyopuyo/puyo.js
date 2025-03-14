@@ -11,8 +11,9 @@ const COLUMNS = 6; //縦の列の数
 let SIZE = 40; //一マスの大きさ
 let tile = []; //盤面用
 const colorlist = ["red", "green", "blue", "yellow", "purple"];
-const interval = 250; //ぷよの落下速度(遅い)
-const fastinterval = 125; //ぷよの落下速度(速い)
+let interval = 0; //ぷよの落下速度
+const slowinterval = 250; //ぷよの落下速度(遅い)
+const fastinterval = 20; //ぷよの落下速度(速い)
 let next = [null, null, null, null] //next 0:ネクストの軸  1:ネクストの回転ぷよ  2,3:ネクネク
 let limit = 0; //ぷよが設置されるまでの時間
 let limitmanage = "off"; //ぷよ設置管理用
@@ -113,9 +114,15 @@ document.addEventListener("touchmove", (event)=>{ //指が触れながら動く�
         pos.x = xTemp;
         pos.drawX = xTemp;
     }
+    if(firsttouchpos.y + SIZE < touchpos.x){
+        interval = fastinterval; //下にスワイプしたら高速落下
+    }else{
+        interval = slowinterval;
+    }
     render();
 })
 document.addEventListener("touchend", (event)=>{
+    interval = slowinterval; //指を離したら遅くする
     if (event.target.tagName === "BUTTON") {
         return; // ボタンなら無視
     }
@@ -300,6 +307,7 @@ function newgame(){
     generatepuyo();
 }
 function generatepuyo(){ //盤面の上部に操作するぷよを生成
+    interval = slowinterval; //落下速度初期設定
     isRotating = false; //回転中か
     limitmanage = "off"; //接地処理用
     dropmanage = 0; //何連続落ちたか
@@ -418,8 +426,18 @@ document.addEventListener("keydown", event => { //キーボード操作
             }
             render();
             break;
+        case "ArrowDown":
+            interval = fastinterval;
+            intervaltime = Date.now() - interval;
+            break;
 
     }
+document.addEventListener("keyup", (event) =>{
+    if(event.key == "ArrowDown"){
+        interval = slowinterval;
+        intervaltime = Date.now()
+    }
+})
 })
 function rotation(RorL){ //スマホ用回転
     if(isRotating == false){
