@@ -139,11 +139,13 @@ document.addEventListener("touchend", (event)=>{
 })
 //ぷよ横移動できるか判定(スマホ用)
 function moveCheck(x0, y0, x1, y1, direction){ //0:移動前座標  1:移動後座標
-    let i = Math.sign(x1 - x0); //(x1 - x0) が正 =>1 負 =>-1
-    for(let n = 0; n < abs(x1 - x0);){
-        n += i;
-        if(isValid(x0 + n, y0) == "notEmpty" || isValid(subpuyo(direction, x0 + n, y0).subX, Math.ceil(subpuyo(direction, x0 + n, y0).subY)) == "notEmpty"){
-            return "notEmpty";
+    if(abs(x1 - x0) >= 1){
+        let i = Math.sign(x1 - x0); //(x1 - x0) が正 =>1 負 =>-1
+        for(let n = 0; n < abs(x1 - x0);){
+            n += i;
+            if(isValid(x0 + n, y0) == "notEmpty" || isValid(subpuyo(direction, x0 + n, y0).subX, Math.ceil(subpuyo(direction, x0 + n, y0).subY)) == "notEmpty"){
+                return "notEmpty";
+            }
         }
     }
 }
