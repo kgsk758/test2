@@ -103,7 +103,10 @@ document.addEventListener("touchmove", (event)=>{ //指が触れながら動く�
     touchpos.y = touch.clientY;
     touchpos.state = "touched";
     let xTemp = xPreserve + (Math.floor(touch.clientX/(SIZE*0.75)) - tapPreserve);
-    if(isValid(xTemp, Math.ceil(pos.y)) == "notEmpty" || isValid(subpuyo(pos.sub, xTemp, pos.y).subX, Math.ceil(subpuyo(pos.sub, xTemp, pos.y).subY)) == "notEmpty"){
+    /*if(isValid(xTemp, Math.ceil(pos.y)) == "notEmpty" || isValid(subpuyo(pos.sub, xTemp, pos.y).subX, Math.ceil(subpuyo(pos.sub, xTemp, pos.y).subY)) == "notEmpty"){
+        xPreserve = pos.x;
+        tapPreserve = Math.floor(touch.clientX/(SIZE*0.75));*/
+    if(moveCheck(pos.x, pos.y, xTemp, pos.y, pos.sub) == "notEmpty"){
         xPreserve = pos.x;
         tapPreserve = Math.floor(touch.clientX/(SIZE*0.75));
     }else{
@@ -134,6 +137,16 @@ document.addEventListener("touchend", (event)=>{
     touchpos.y = touch.clientY;
     touchpos.state = "untouched";
 })
+//ぷよ横移動できるか判定(スマホ用)
+function moveCheck(x0, y0, x1, y1, direction){ //0:移動前座標  1:移動後座標
+    let i = Math.sign(x1 - x0); //(x1 - x0) が正 =>1 負 =>-1
+    for(let n = 0; n < abs(x1 - x0);){
+        n += i;
+        if(isValid(x0 + n, y0) == "notEmpty" || isValid(subpuyo(direction, x0 + n, y0).subX, Math.ceil(subpuyo(direction, x0 + n, y0).subY)) == "notEmpty"){
+            return "notEmpty";
+        }
+    }
+}
 //ぷよ描画
 function drawpuyo(color, row, column, state){
     let spriteRow = 0;
