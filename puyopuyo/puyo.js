@@ -29,7 +29,7 @@ let rotateSpeed = 50; //四分の一回転にかかるミリ秒
 let tapPreserve = 0; //スワイプした瞬間の指の座標を保存
 let xPreserve = 0; //スワイプした瞬間の操作ぷよの座標を保存
 let k = 0;
-const fallSpeed = 100; //設置後の落ちる速さ(ミリ秒)
+const fallSpeed = 20; //設置後の落ちる速さ(ミリ秒)
 let animationDt = { //アニメーションで移動する距離
     dx: 0,
     dy: 0
