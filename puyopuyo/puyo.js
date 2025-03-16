@@ -89,6 +89,7 @@ if(width <= 480){ //スマホ
 //タッチ処理
 document.addEventListener("touchstart", (event)=>{
     if(drawMainPuyo == true){
+        sensitivity = 0.75;
         if (event.target.tagName === "BUTTON") {
             return; // ボタンなら無視
         }
@@ -121,9 +122,19 @@ document.addEventListener("touchmove", (event)=>{ //指が触れながら動く�
         }
         if(firsttouchpos.y + SIZE < touchpos.y){
             interval = fastinterval; //下にスワイプしたら高速落下
+            if(sensitivity == 0.75){
+                sensitivity = 1;
+                tapPreserve = Math.floor(touch.clientX/(SIZE*sensitivity));
+                xPreserve = pos.x;
+            }
             sensitivity = 1;
         }else{
             interval = slowinterval;
+            if(sensitivity == 1){
+                sensitivity = 0.75;
+                tapPreserve = Math.floor(touch.clientX/(SIZE*sensitivity));
+                xPreserve = pos.x;
+            }
             sensitivity = 0.75;
         }
         render();
