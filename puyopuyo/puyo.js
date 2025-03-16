@@ -127,27 +127,29 @@ document.addEventListener("touchmove", (event)=>{ //指が触れながら動く�
     }
 })
 document.addEventListener("touchend", (event)=>{
-    interval = slowinterval; //指を離したら遅くする
-    if (event.target.tagName === "BUTTON") {
-        return; // ボタンなら無視
-    }
-    let touch = event.changedTouches[0];
-    if(Date.now() - time < touchTime && Math.abs(firsttouchpos.x - touch.clientX) < SIZE / 3 && Math.abs(firsttouchpos.y - touch.clientY) < SIZE / 3){
-        //タップ
-        console.log(touch.clientX);
-        if(touch.clientX >= width/2){ //タップの座標が画面の半分より大きいか
-            //右側タップ
-            rotation("right");
-        }else{
-            //左側タップ
-            rotation("left");
+    if(drawMainPuyo == true){
+        interval = slowinterval; //指を離したら遅くする
+        if (event.target.tagName === "BUTTON") {
+            return; // ボタンなら無視
         }
-    }else{
-        //スワイプ
+        let touch = event.changedTouches[0];
+        if(Date.now() - time < touchTime && Math.abs(firsttouchpos.x - touch.clientX) < SIZE / 3 && Math.abs(firsttouchpos.y - touch.clientY) < SIZE / 3){
+            //タップ
+            console.log(touch.clientX);
+            if(touch.clientX >= width/2){ //タップの座標が画面の半分より大きいか
+                //右側タップ
+                rotation("right");
+            }else{
+                //左側タップ
+                rotation("left");
+            }
+        }else{
+            //スワイプ
+        }
+        touchpos.x = touch.clientX;
+        touchpos.y = touch.clientY;
+        touchpos.state = "untouched";
     }
-    touchpos.x = touch.clientX;
-    touchpos.y = touch.clientY;
-    touchpos.state = "untouched";
 })
 //ぷよ横移動できるか判定(スマホ用)
 function moveCheck(x0, y0, x1, y1, direction){ //0:移動前座標  1:移動後座標
