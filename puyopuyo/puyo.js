@@ -1,5 +1,6 @@
 //初期設定
 let time = Date.now();
+let sensitivity = 0; //横移動の感度
 let timeoutId = 0;
 let rotateTimer = 0;
 const canvas = document.getElementById("maincanvas"); //canvas取得
@@ -97,7 +98,7 @@ document.addEventListener("touchstart", (event)=>{
         firsttouchpos.x = touch.clientX;
         firsttouchpos.y = touch.clientY;
         touchpos.state = "touched";
-        tapPreserve = Math.floor(touch.clientX/(SIZE*0.75));
+        tapPreserve = Math.floor(touch.clientX/(SIZE*sensitivity));
         xPreserve = pos.x;
     }
 })
@@ -110,22 +111,20 @@ document.addEventListener("touchmove", (event)=>{ //指が触れながら動く�
         touchpos.x = touch.clientX;
         touchpos.y = touch.clientY;
         touchpos.state = "touched";
-        let xTemp = xPreserve + (Math.floor(touch.clientX/(SIZE*0.75)) - tapPreserve);
-        /*if(isValid(xTemp, Math.ceil(pos.y)) == "notEmpty" || isValid(subpuyo(pos.sub, xTemp, pos.y).subX, Math.ceil(subpuyo(pos.sub, xTemp, pos.y).subY)) == "notEmpty"){
-            xPreserve = pos.x;
-            tapPreserve = Math.floor(touch.clientX/(SIZE*0.75));*/
-
+        let xTemp = xPreserve + (Math.floor(touch.clientX/(SIZE*sensitivity)) - tapPreserve);
         if(moveCheck(pos.x, pos.y, xTemp, pos.y, pos.sub) == "notEmpty"){ //横移動
             xPreserve = pos.x;
-            tapPreserve = Math.floor(touch.clientX/(SIZE*0.75));
+            tapPreserve = Math.floor(touch.clientX/(SIZE*sensitivity));
         }else{
             pos.x = xTemp;
             pos.drawX = xTemp;
         }
         if(firsttouchpos.y + SIZE < touchpos.y){
             interval = fastinterval; //下にスワイプしたら高速落下
+            sensitivity = 1;
         }else{
             interval = slowinterval;
+            sensitivity = 0.75;
         }
         render();
     }
@@ -320,6 +319,7 @@ function newgame(){
     generatepuyo();
 }
 function generatepuyo(){ //盤面の上部に操作するぷよを生成
+    sensitivity = 0.75;
     drawMainPuyo = true; //操作ぷよを描画する
     interval = slowinterval; //落下速度初期設定
     isRotating = false; //回転中か
