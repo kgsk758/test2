@@ -86,31 +86,34 @@ if(width <= 480){ //スマホ
 //nextcanvas.style.left = `${canvas.offsetLeft + SIZE*COLUMNS}px`;
 //タッチ処理
 document.addEventListener("touchstart", (event)=>{
-    if (event.target.tagName === "BUTTON") {
-        return; // ボタンなら無視
+    if(drawMainPuyo == true){
+        if (event.target.tagName === "BUTTON") {
+            return; // ボタンなら無視
+        }
+        let touch = event.touches[0];
+        touchpos.x = touch.clientX;
+        touchpos.y = touch.clientY;
+        firsttouchpos.x = touch.clientX;
+        firsttouchpos.y = touch.clientY;
+        touchpos.state = "touched";
+        tapPreserve = Math.floor(touch.clientX/(SIZE*0.75));
+        xPreserve = pos.x;
     }
-    let touch = event.touches[0];
-    touchpos.x = touch.clientX;
-    touchpos.y = touch.clientY;
-    firsttouchpos.x = touch.clientX;
-    firsttouchpos.y = touch.clientY;
-    touchpos.state = "touched";
-    tapPreserve = Math.floor(touch.clientX/(SIZE*0.75));
-    xPreserve = pos.x;
 })
 document.addEventListener("touchmove", (event)=>{ //指が触れながら動く度呼び出される
-    if (event.target.tagName === "BUTTON") {
-        return; // ボタンなら無視
-    }
-    let touch = event.touches[0];
-    touchpos.x = touch.clientX;
-    touchpos.y = touch.clientY;
-    touchpos.state = "touched";
-    let xTemp = xPreserve + (Math.floor(touch.clientX/(SIZE*0.75)) - tapPreserve);
-    /*if(isValid(xTemp, Math.ceil(pos.y)) == "notEmpty" || isValid(subpuyo(pos.sub, xTemp, pos.y).subX, Math.ceil(subpuyo(pos.sub, xTemp, pos.y).subY)) == "notEmpty"){
-        xPreserve = pos.x;
-        tapPreserve = Math.floor(touch.clientX/(SIZE*0.75));*/
-    if(drawMainPuyo == true){ //操作ぷよの移動が許可されているか
+    if(drawMainPuyo == true){
+        if (event.target.tagName === "BUTTON") {
+            return; // ボタンなら無視
+        }
+        let touch = event.touches[0];
+        touchpos.x = touch.clientX;
+        touchpos.y = touch.clientY;
+        touchpos.state = "touched";
+        let xTemp = xPreserve + (Math.floor(touch.clientX/(SIZE*0.75)) - tapPreserve);
+        /*if(isValid(xTemp, Math.ceil(pos.y)) == "notEmpty" || isValid(subpuyo(pos.sub, xTemp, pos.y).subX, Math.ceil(subpuyo(pos.sub, xTemp, pos.y).subY)) == "notEmpty"){
+            xPreserve = pos.x;
+            tapPreserve = Math.floor(touch.clientX/(SIZE*0.75));*/
+
         if(moveCheck(pos.x, pos.y, xTemp, pos.y, pos.sub) == "notEmpty"){ //横移動
             xPreserve = pos.x;
             tapPreserve = Math.floor(touch.clientX/(SIZE*0.75));
@@ -125,6 +128,7 @@ document.addEventListener("touchmove", (event)=>{ //指が触れながら動く�
         }
         render();
     }
+
 })
 document.addEventListener("touchend", (event)=>{
     if(drawMainPuyo == true){
