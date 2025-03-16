@@ -1,5 +1,6 @@
 //初期設定
 let time = Date.now();
+let timeoutId = 0;
 let rotateTimer = 0;
 const canvas = document.getElementById("maincanvas"); //canvas取得
 const ctx = canvas.getContext("2d");
@@ -222,7 +223,7 @@ function drawpuyo(color, row, column, state){
     }
     if(color != null){ //空のマスでない場合
         ctx.drawImage(allpuyo,
-            spriteColumn*32, spriteRow*32 - 1, 32, 32, // スプライトシートの切り取り位置 (sx, sy, sw, sh)
+            spriteColumn*32 + 0.1, spriteRow*32 + 0.1, 32 - 0.2, 32 - 0.2, // スプライトシートの切り取り位置 (sx, sy, sw, sh)
             column*SIZE, row*SIZE, SIZE, SIZE // `canvas` 上の描画位置とサイズ (dx, dy, dw, dh)
         )
     }
@@ -278,6 +279,7 @@ newgameElement.addEventListener("click", newgame); //newgameボタンが押さ�
 let intervaltime = Date.now(); //操作ぷよ自然落下管理用
 let thiscolor = []; //今回のゲームに使われる四色用
 function newgame(){
+    clearTimeout(timeoutId);
     intervaltime = Date.now(); //操作ぷよ自然落下管理用
     let randomFour = colorlist.sort(() => Math.random() - 0.5).slice(0, 4); //5つの色からランダムに4つ選ぶ
     thiscolor = [...randomFour]; //今回のゲームに使われる四色
@@ -533,7 +535,7 @@ function fall(){ //ぷよを落下の管理
     }
     let count = 0; //落下処理を行った回数カウント
     let copy = [...fallcheck];
-    setTimeout(fallOnce, fallSpeed);
+    timeoutId = setTimeout(fallOnce, 0);
     function fallOnce(){ //半マスだけ落下させる
         count++;
         ctx.clearRect(0, 0, canvas.width, canvas.height); // 画面をクリア
@@ -559,20 +561,9 @@ function fall(){ //ぷよを落下の管理
             }
         }
         if(j > 0){
-            setTimeout(fallOnce, fallSpeed);
-        }else{
+            timeoutId = setTimeout(fallOnce, fallSpeed);
+        }else{ //次の処理へ移行
             for(let i = tile.length - 1; i >= 0; i--){ //インデックスは最後のマスから最初のマスまで
-                /*tile[i + fallcheck[i]*COLUMNS] = {
-                    color: tile[i].color,
-                    row: tile[i].row + fallcheck[i],
-                    column: tile[i],
-                    state: {
-                        right: null,
-                        above: null,
-                        left: null,
-                        below: null
-                    }
-                }; //tileのi番目の情報を落ちるマス分下のマスに代入*/
                 if(fallcheck[i] > 0){ //そのマスの落下量が一以上なら
                     tile[i + fallcheck[i]*COLUMNS] = {
                         color: tile[i].color,
@@ -590,12 +581,27 @@ function fall(){ //ぷよを落下の管理
                 }
                 
             }
-           console.log(copy);
-           console.log(fallcheck);
-           console.log(tile);
-           render();
+            render();
+            connect();
         }
     }
+}
+function connect(){
+    for(let i = 0; i < tile.length; i++){
+        if(i % COLUMNS != 0 && tile[i - 1].color == tile[i].color){ //左端でなければかつ左がおなじ色なら
+            tile[i].state.left = "same";
+        }
+        if(i % COLUMNS != COLUMNS - 1 && tile[i + 1].color == tile[i].color){ //右端でなければかつ右がおなじ色なら
+            tile[i].state.right = "same";
+        }
+        if(i > COLUMNS - 1 && tile[i - COLUMNS].color == tile[i].color){ //上端でなく上と同じ色なら
+            tile[i].state.above = "same";
+        }
+        if(tile[i].row < ROWS -3 && tile[i + COLUMNS].color == tile[i].color){ //下端でなく下と同じ色なら
+            tile[i].state.below = "same";
+        }
+    }
+    render();
 }
 function render(){
     ctx.clearRect(0, 0, canvas.width, canvas.height); // 画面をクリア
