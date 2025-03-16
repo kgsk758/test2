@@ -649,7 +649,9 @@ function mainroop(){
     }
     if(Date.now() - intervaltime > interval){ //操作ぷよの自然落下をintervalミリ秒ごとに呼び出す
         intervaltime = Date.now();
-        droppuyo();
+        if(drawMainPuyo == true){
+            droppuyo();
+        }
     }
     if(dropmanage >= 3){ //操作ぷよが3連続で下に進んだときlimitを元の値にリセット
         limit = slowinterval*2; //ぷよが設置されるまでの時間
@@ -694,7 +696,9 @@ function mainroop(){
                 rotateTimer = Date.now();
                 pos.drawsub += rotateManage/4;
                 k++;
-                render();
+                if(drawMainPuyo == true){
+                    render();
+                }
             }
         }else{
             pos.drawX = pos.x;
