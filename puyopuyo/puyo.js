@@ -29,7 +29,7 @@ let rotateSpeed = 50; //四分の一回転にかかるミリ秒
 let tapPreserve = 0; //スワイプした瞬間の指の座標を保存
 let xPreserve = 0; //スワイプした瞬間の操作ぷよの座標を保存
 let k = 0;
-const fallSpeed = 20; //設置後の落ちる速さ(ミリ秒)
+const fallSpeed = 50; //設置後の落ちる速さ(ミリ秒)
 let animationDt = { //アニメーションで移動する距離
     dx: 0,
     dy: 0
@@ -150,7 +150,7 @@ document.addEventListener("touchend", (event)=>{
         let touch = event.changedTouches[0];
         if(Date.now() - time < touchTime && Math.abs(firsttouchpos.x - touch.clientX) < SIZE / 3 && Math.abs(firsttouchpos.y - touch.clientY) < SIZE / 3){
             //タップ
-            console.log(touch.clientX);
+            //console.log(touch.clientX);
             if(touch.clientX >= width/2){ //タップの座標が画面の半分より大きいか
                 //右側タップ
                 rotation("right");
@@ -317,16 +317,6 @@ function newgame(){
             });
         }
     }
-    tile[76].color = "red";
-    tile[82].color = "red";
-    tile[73].color = "red";
-    tile[75].color = "red";
-    tile[79].color = "red";
-    tile[81].color = "red";
-    tile[67].color = "red";
-    tile[69].color = "red";
-    tile[49].color = "red";
-    tile[51].color = "red";
     generatepuyo();
 }
 function generatepuyo(){ //盤面の上部に操作するぷよを生成
@@ -588,31 +578,104 @@ function fall(){ //ぷよを落下の管理
                         }
                     }; //tileのi番目の情報を落ちるマス分下のマスに代入
                     tile[i].color = null;
-                    console.log(tile[i + fallcheck[i]*COLUMNS]);
+                    //console.log(tile[i + fallcheck[i]*COLUMNS]);
                 }
                 
             }
             render();
             connect();
+            render();
+            chain();
         }
     }
 }
-function connect(){
+function connect(){ //ぷよを繋ぐ
     for(let i = 0; i < tile.length; i++){
-        if(i % COLUMNS != 0 && tile[i - 1].color == tile[i].color){ //左端でなければかつ左がおなじ色なら
-            tile[i].state.left = "same";
+        tile[i].state = {
+            right: null,
+            above: null,
+            left: null,
+            below: null
         }
-        if(i % COLUMNS != COLUMNS - 1 && tile[i + 1].color == tile[i].color){ //右端でなければかつ右がおなじ色なら
-            tile[i].state.right = "same";
-        }
-        if(i > COLUMNS - 1 && tile[i - COLUMNS].color == tile[i].color){ //上端でなく上と同じ色なら
-            tile[i].state.above = "same";
-        }
-        if(tile[i].row < ROWS -3 && tile[i + COLUMNS].color == tile[i].color){ //下端でなく下と同じ色なら
-            tile[i].state.below = "same";
+        if(tile[i].color != null){
+            if(i % COLUMNS != 0 && tile[i - 1].color == tile[i].color){ //左端でなければかつ左がおなじ色なら
+                tile[i].state.left = "same";
+            }
+            if(i % COLUMNS != COLUMNS - 1 && tile[i + 1].color == tile[i].color){ //右端でなければかつ右がおなじ色なら
+                tile[i].state.right = "same";
+            }
+            if(i > COLUMNS - 1 && tile[i - COLUMNS].color == tile[i].color){ //上端でなく上と同じ色なら
+                tile[i].state.above = "same";
+            }
+            if(tile[i].row < ROWS -3 && tile[i + COLUMNS].color == tile[i].color){ //下端でなく下と同じ色なら
+                tile[i].state.below = "same";
+            }
         }
     }
-    render();
+}
+function chain(){ //一連鎖分
+    let chainPuyo = [];
+    let chainPuyoSpread = [];
+    for(let i = 0; i < tile.length; i++){
+        let checked = []; //チェックされたマス
+        function check(k){ //再帰的にチェック
+            checked.push(k);
+            if(tile[k].state.right == "same" && checked.includes(k + 1) == false){
+                check(k + 1);
+            }
+            if(tile[k].state.above == "same" && checked.includes(k - COLUMNS) == false){
+                check(k - COLUMNS);
+            }
+            if(tile[k].state.left == "same" && checked.includes(k - 1) == false){
+                check(k - 1);
+            }
+            if(tile[k].state.below == "same" && checked.includes(k + COLUMNS) == false){
+                check(k + COLUMNS);
+            }
+        }
+        if(chainPuyoSpread.includes(i) == false){
+            check(i);
+        }
+        if(checked.length >= 4){ //四個以上連なったら
+            chainPuyoSpread.push(...checked);
+            chainPuyo.push([tile[i].color, ...checked]);
+        }
+    }
+    console.log(chainPuyoSpread);
+    if(chainPuyo.length > 0){ //消えるぷよがあったら
+        /*for(let n = 0; n < chainPuyoSpread.length; n++){
+            tile[chainPuyoSpread[n]].color = null;
+            tile[chainPuyoSpread[n]].state = {
+                right: null,
+                above: null,
+                left: null,
+                below: null
+            };
+            console.log("sss");
+        }*/
+        setTimeout(() => {
+            for(let n = 0; n < chainPuyoSpread.length; n++){
+                tile[chainPuyoSpread[n]].state = "vanish";
+            }
+            render();
+            setTimeout(() => {
+                for(let n = 0; n < chainPuyoSpread.length; n++){
+                    tile[chainPuyoSpread[n]].color = null;
+                    tile[chainPuyoSpread[n]].state = {
+                        right: null,
+                        above: null,
+                        left: null,
+                        below: null
+                    };
+                }
+                render();
+                setTimeout(fall, 250);
+            }, 250);
+        }, 250);
+        //setTimeout(fall, 500);
+    }else{
+        generatepuyo();
+    }
 }
 function render(){
     ctx.clearRect(0, 0, canvas.width, canvas.height); // 画面をクリア
