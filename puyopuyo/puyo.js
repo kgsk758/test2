@@ -130,14 +130,14 @@ document.addEventListener("touchmove", (event)=>{ //指が触れながら動く�
         if(firsttouchpos.y + SIZE < touchpos.y){
             interval = fastinterval; //下にスワイプしたら高速落下
             if(sensitivity == 0.75){
-                sensitivity = 1;
+                sensitivity = 1.5;
                 tapPreserve = Math.floor(touch.clientX/(SIZE*sensitivity));
                 xPreserve = pos.x;
             }
-            sensitivity = 1;
+            sensitivity = 1.5;
         }else{
             interval = slowinterval;
-            if(sensitivity == 1){
+            if(sensitivity == 1.5){
                 sensitivity = 0.75;
                 tapPreserve = Math.floor(touch.clientX/(SIZE*sensitivity));
                 xPreserve = pos.x;
