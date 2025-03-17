@@ -107,11 +107,6 @@ document.addEventListener("touchstart", (event)=>{
 })
 document.addEventListener("touchmove", (event)=>{ //指が触れながら動く度呼び出される
     if(drawMainPuyo == true){
-        if(touchManage == 0){
-            touchManage = 1;
-            tapPreserve = Math.floor(touch.clientX/(SIZE*sensitivity));
-            xPreserve = pos.x;
-        }
         if (event.target.tagName === "BUTTON") {
             return; // ボタンなら無視
         }
@@ -119,6 +114,11 @@ document.addEventListener("touchmove", (event)=>{ //指が触れながら動く�
         touchpos.x = touch.clientX;
         touchpos.y = touch.clientY;
         touchpos.state = "touched";
+        if(touchManage == 0){
+            touchManage = 1;
+            tapPreserve = Math.floor(touch.clientX/(SIZE*sensitivity));
+            xPreserve = pos.x;
+        }
         let xTemp = xPreserve + (Math.floor(touch.clientX/(SIZE*sensitivity)) - tapPreserve);
         if(moveCheck(pos.x, pos.y, xTemp, pos.y, pos.sub) == "notEmpty"){ //横移動
             xPreserve = pos.x;
