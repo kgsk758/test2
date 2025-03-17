@@ -1,4 +1,5 @@
 //初期設定
+let touchManage = 0;
 let time = Date.now();
 let sensitivity = 0; //横移動の感度
 let timeoutId = 0;
@@ -88,6 +89,7 @@ if(width <= 480){ //スマホ
 //nextcanvas.style.left = `${canvas.offsetLeft + SIZE*COLUMNS}px`;
 //タッチ処理
 document.addEventListener("touchstart", (event)=>{
+    touchManage = 1;
     if(drawMainPuyo == true){
         sensitivity = 0.75;
         if (event.target.tagName === "BUTTON") {
@@ -105,6 +107,11 @@ document.addEventListener("touchstart", (event)=>{
 })
 document.addEventListener("touchmove", (event)=>{ //指が触れながら動く度呼び出される
     if(drawMainPuyo == true){
+        if(touchManage == 0){
+            touchManage = 1;
+            tapPreserve = Math.floor(touch.clientX/(SIZE*sensitivity));
+            xPreserve = pos.x;
+        }
         if (event.target.tagName === "BUTTON") {
             return; // ボタンなら無視
         }
@@ -322,6 +329,7 @@ function newgame(){
 function generatepuyo(){ //盤面の上部に操作するぷよを生成
     sensitivity = 0.75;
     drawMainPuyo = true; //操作ぷよを描画する
+    touchManage = 0;
     interval = slowinterval; //落下速度初期設定
     isRotating = false; //回転中か
     limitmanage = "off"; //接地処理用
