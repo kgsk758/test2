@@ -643,16 +643,6 @@ function chain(){ //一連鎖分
     }
     console.log(chainPuyoSpread);
     if(chainPuyo.length > 0){ //消えるぷよがあったら
-        /*for(let n = 0; n < chainPuyoSpread.length; n++){
-            tile[chainPuyoSpread[n]].color = null;
-            tile[chainPuyoSpread[n]].state = {
-                right: null,
-                above: null,
-                left: null,
-                below: null
-            };
-            console.log("sss");
-        }*/
         setTimeout(() => {
             for(let n = 0; n < chainPuyoSpread.length; n++){
                 tile[chainPuyoSpread[n]].state = "vanish";
@@ -672,7 +662,6 @@ function chain(){ //一連鎖分
                 setTimeout(fall, 250);
             }, 250);
         }, 250);
-        //setTimeout(fall, 500);
     }else{
         generatepuyo();
     }
