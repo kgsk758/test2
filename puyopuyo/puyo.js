@@ -127,7 +127,9 @@ document.addEventListener("touchmove", (event)=>{ //指が触れながら動く�
             //interval = slowinterval;
         }
         if(touchpos.y - firsttouchpos.y < Math.abs(firsttouchpos.x - touchpos.x)){
-            interval = slowinterval;
+            if(interval == fastinterval){
+                interval = slowinterval;
+            }
             if(moveCheck(pos.x, pos.y, xTemp, pos.y, pos.sub) == "notEmpty"){ //横移動
                 xPreserve = pos.x;
                 tapPreserve = Math.floor(touch.clientX/(SIZE*sensitivity));
