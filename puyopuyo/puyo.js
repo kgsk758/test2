@@ -120,12 +120,14 @@ document.addEventListener("touchmove", (event)=>{ //指が触れながら動く�
             xPreserve = pos.x;
         }
         let xTemp = xPreserve + (Math.floor(touch.clientX/(SIZE*sensitivity)) - tapPreserve);
-        if(moveCheck(pos.x, pos.y, xTemp, pos.y, pos.sub) == "notEmpty"){ //横移動
-            xPreserve = pos.x;
-            tapPreserve = Math.floor(touch.clientX/(SIZE*sensitivity));
-        }else{
-            pos.x = xTemp;
-            pos.drawX = xTemp;
+        if(touchpos.y - firsttouchpos.y < Math.abs(firsttouchpos.x - touchpos.x)){
+            if(moveCheck(pos.x, pos.y, xTemp, pos.y, pos.sub) == "notEmpty"){ //横移動
+                xPreserve = pos.x;
+                tapPreserve = Math.floor(touch.clientX/(SIZE*sensitivity));
+            }else{
+                pos.x = xTemp;
+                pos.drawX = xTemp;
+            }
         }
         if(firsttouchpos.y + 0.75*SIZE < touchpos.y){
             interval = fastinterval; //下にスワイプしたら高速落下
