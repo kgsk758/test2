@@ -131,11 +131,11 @@ document.addEventListener("touchmove", (event)=>{ //指が触れながら動く�
                 xPreserve = pos.x;
                 tapPreserve = Math.floor(touch.clientX/(SIZE*sensitivity));
             }else{
-                pos.x = xTemp;
-                pos.drawX = xTemp;
-                if(interval == fastinterval){
+                if(interval == fastinterval && pos.x == xTemp){
                     interval = slowinterval;
                 }
+                pos.x = xTemp;
+                pos.drawX = xTemp;
             }
         }else{
             tapPreserve = Math.floor(touch.clientX/(SIZE*sensitivity));
