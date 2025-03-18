@@ -121,7 +121,7 @@ document.addEventListener("touchmove", (event)=>{ //指が触れながら動く�
         }
         let xTemp = xPreserve + (Math.floor(touch.clientX/(SIZE*sensitivity)) - tapPreserve);
         
-        if(firsttouchpos.y + 0.75*SIZE < touchpos.y){
+        if(firsttouchpos.y + 0.75*SIZE < touchpos.y && touchpos.y - firsttouchpos.y > Math.abs(firsttouchpos.x - touchpos.x)){
             interval = fastinterval; //下にスワイプしたら高速落下
         }
         if(touchpos.y - firsttouchpos.y < Math.abs(firsttouchpos.x - touchpos.x)){
@@ -135,7 +135,6 @@ document.addEventListener("touchmove", (event)=>{ //指が触れながら動く�
         }else{
             tapPreserve = Math.floor(touch.clientX/(SIZE*sensitivity));
             xPreserve = pos.x;
-            interval = slowinterval;
         }
         render();
     }
